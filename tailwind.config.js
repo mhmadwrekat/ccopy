@@ -5,31 +5,9 @@ module.exports = {
     './components/**/*.{js,ts,jsx,tsx}',
   ],
   theme: {
-    borderWidth: {
-      DEFAULT: '1px',
-      0: '0',
-      1: '1px',
-      2: '2px',
-      3: '3px',
-      4: '4px',
-      6: '6px',
-      8: '8px',
-    },
     colors: {
-      BLUE: '#187498',
-      Purp100: '#45378B',
-      Purp200: '#695CAD',
-      Purp400: '#382F68',
-      GREEN: '#36AE7C',
-      YELLOW: '#E0A719',
-      SKY: '#17C1BC',
-      RED: '#EB5353',
-      GRAY: '#CCCCCC',
-      GRAY50: '#B0B0B0',
-      GRAY100: '#F5F5F5',
-      GRAY200: '#DDDDDD',
-      GRAY300: '#7F7F7F',
-      GRAY400: '#686767',
+      BLUE: '#1d62a5',
+      LogoPurp: '#453087',
     },
     extend: {
       fontFamily: {

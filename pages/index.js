@@ -1,41 +1,40 @@
-import React, { useState, useEffect } from 'react'
+import React from 'react'
 import dynamic from 'next/dynamic'
 import { BASE_URL } from '../config/config'
-import axios from 'axios'
-import Cookies from 'cookies'
-
-// Apple View component
-const Category_news = dynamic(() =>
-  import('../components/apple_template/Category_news')
-)
-const Colored = dynamic(() => import('../components/apple_template/Colored'))
-const Voice = dynamic(() => import('../components/apple_template/Voice'), {
-  ssr: false,
-})
-const Logaimat = dynamic(() => import('../components/apple_template/Logaimat'))
 
 // page Component
-const HeadComp = dynamic(() => import('../components/page/HeadComp'))
-const Nav = dynamic(() => import('../components/page/Nav'))
-const Footer = dynamic(() => import('../components/page/Footer'))
+import HeadComp from '../components/page/HeadComp'
+import Nav from '../components/page/Nav'
+import Footer from '../components/page/Footer'
+// Apple View component
+const ImportantNews = dynamic(() =>
+  import('../components/appleStructrue/ImportantNews')
+)
+const ForYou = dynamic(() => import('../components/appleStructrue/ForYou'))
+const ColoredSection = dynamic(() =>
+  import('../components/appleStructrue/ColoredSection')
+)
+const Logaimat = dynamic(() => import('../components/appleStructrue/Logaimat'))
+const Video = dynamic(() => import('../components/appleStructrue/Video'))
+const Voice = dynamic(() => import('../components/appleStructrue/Voice'))
+const Hashtag = dynamic(() => import('../components/appleStructrue/Hashtag'))
 
 // Get Server Side Function
 export async function getServerSideProps({ req, res }) {
   // Cache the content of this page for 12 hrs
   res.setHeader(
     'Cache-Control',
-    'public, s-maxage=604800, stale-while-revalidate=59'
+    'public, s-maxage=10, stale-while-revalidate=59'
   )
-  //604800
-  // Create a cookies instance
-  const cookies = new Cookies(req, res)
 
-  let country_code = cookies.get('country_code')
-  let user_id = cookies.get('user_id')
-  let user_token = cookies.get('user_token')
+  // Get Country Code
+  const country_code_url = 'https://geolocation-db.com/json/'
+  const country_code_res = await fetch(country_code_url)
+  const country_code = await country_code_res.json()
+  const ready_country_code = country_code.country_code
 
   // Get All News
-  const all_news_url = `${BASE_URL}/v1/Web/Sections?current_country=${country_code}&userId=${user_id}`
+  const all_news_url = `${BASE_URL}/v1/Web/Sections?current_country=JO`
   const all_news_res = await fetch(all_news_url)
   const all_news = await all_news_res.json()
 
@@ -45,231 +44,14 @@ export async function getServerSideProps({ req, res }) {
   keys.map((item) => {
     custom_array.push(all_news.data[item])
   })
-  // Get Logaimat API
-  const LoqaimatDataReq = axios({
-    method: 'GET',
-    url: `${BASE_URL}/v1/Web/Loqaimat`,
-    headers: {
-      Authorization: `Basic ${user_token}`,
-    },
-  })
 
-  const loqaimat = await LoqaimatDataReq
-
-  //return props
   return {
     props: {
-      all: '',
-      loqaimat: loqaimat.data,
       all_news: custom_array,
-      user_id: user_id,
     },
   }
 }
 
-const index = (props) => {
-  return (
-    <React.Fragment>
-      <HeadComp />
-      <div dir="rtl" id="project_body" className="bg-white text-black">
-        <Nav />
-        {console.log(props.user_id)}
-        {props.all_news[0]?.data && (
-          <>
-            <Category_news
-              loading="eager"
-              title={'أهم الأخبار'}
-              category_news={props.all_news[0]}
-              subs={null}
-              bg_color={'bg-RED'}
-              title_color={'text-RED'}
-              fill_color={'fill-RED'}
-            />
-
-            {/* <Category_news
-              loading="lazy"
-              title={'  الشأن الدولي'}
-              category_news={props.all_news[11]}
-              subs={true}
-              bg_color={'bg-YELLOW'}
-              title_color={'text-YELLOW'}
-              fill_color={'fill-YELLOW'}
-              description={'جميع ما يحدث حول العالم '}
-            />
-            <Category_news
-              loading="lazy"
-              title={' الصحه'}
-              category_news={props.all_news[4]}
-              subs={true}
-              bg_color={'bg-BLUE'}
-              title_color={'text-BLUE'}
-              fill_color={'fill-BLUE'}
-              description={'جميع الأخبار المتعلقة في عالم الصحه من أهم المصادر'}
-            />
-            <Voice
-              loading="lazy"
-              title={'الصوتيات '}
-              news_one={props.all_news[6]}
-              news_two={props.all_news[6]}
-              subs={true}
-              title_color={'text-YELLOW'}
-              fill_color={'fill-YELLOW'}
-              card_color={'bg-GRAY100'}
-              desc_color={'text-GRAY400'}
-              theme={'bg-YELLOW'}
-              description={'استمع للاخبار الصوتيه الاكثر استماعا على الزبده'}
-            />
-            <Category_news
-              loading="lazy"
-              title={' تكنولوجيا'}
-              category_news={props.all_news[12]}
-              subs={true}
-              bg_color={'bg-GREEN'}
-              title_color={'text-GREEN'}
-              fill_color={'fill-GREEN'}
-              description={'جميع ما يخص عالم التكنولوجيا بين يديك'}
-            />
-            <Category_news
-              loading="lazy"
-              title={' لايف ستايل'}
-              category_news={props.all_news[16]}
-              subs={true}
-              bg_color={'bg-RED'}
-              title_color={'text-RED'}
-              fill_color={'fill-RED'}
-            />
-            <Category_news
-              loading="lazy"
-              title={' غزو أوكرانيا'}
-              category_news={props.all_news[8]}
-              subs={true}
-              bg_color={'bg-YELLOW'}
-              title_color={'text-YELLOW'}
-              fill_color={'fill-YELLOW'}
-              description={'جميع ما يخص أحداث غزو أوكرانيا'}
-            />
-            <Logaimat
-              loading="lazy"
-              title={'لقيمات'}
-              important_news={props.loqaimat.data[0].screens}
-              subs={true}
-              title_color={'text-SKY'}
-              theme={'bg-SKY'}
-              card_color={'bg-GRAY100'}
-              fill_color={'fill-SKY'}
-              desc_color={'text-GRAY400'}
-              text_color={'text-black'}
-              description={'بطريقة جميلة يمكنك قرائه المواضيع'}
-            />
-            <Category_news
-              loading="lazy"
-              title={'اخبار الفن'}
-              category_news={props.all_news[15]}
-              subs={true}
-              bg_color={'bg-BLUE'}
-              title_color={'text-BLUE'}
-              fill_color={'fill-BLUE'}
-              description={'جميع الأخبار المتعلقة في عالم الفن من أهم المصادر'}
-            />
-            <Category_news
-              loading="lazy"
-              title={' مال وأعمال'}
-              category_news={props.all_news[7]}
-              subs={true}
-              bg_color={'bg-GREEN'}
-              title_color={'text-GREEN'}
-              fill_color={'fill-GREEN'}
-              description={
-                'جميع ما يخص عالم المال والأعمال على المستوى المحلي والدولي'
-              }
-            />
-            <Category_news
-              loading="lazy"
-              title={' ترند'}
-              category_news={props.all_news[5]}
-              subs={true}
-              bg_color={'bg-RED'}
-              title_color={'text-RED'}
-              fill_color={'fill-RED'}
-              description={
-                'جميع الأخبار المتعلقة في عالميات الترند من أهم المصادر'
-              }
-            />
-            <Category_news
-              loading="lazy"
-              title={'  الشرق الأوسط'}
-              category_news={props.all_news[14]}
-              subs={true}
-              bg_color={'bg-YELLOW'}
-              title_color={'text-YELLOW'}
-              fill_color={'fill-YELLOW'}
-              description={'جميع ما يحدث حول العالم '}
-            />
-            <Category_news
-              loading="lazy"
-              title={' رياضه'}
-              category_news={props.all_news[3]}
-              subs={true}
-              bg_color={'bg-BLUE'}
-              title_color={'text-BLUE'}
-              fill_color={'fill-BLUE'}
-              description={'جميع الأخبار المتعلقة في عالم الرياضه حول العالم'}
-            />
-            <Category_news
-              loading="lazy"
-              title={' العاب'}
-              category_news={props.all_news[13]}
-              subs={true}
-              bg_color={'bg-GREEN'}
-              title_color={'text-GREEN'}
-              fill_color={'fill-GREEN'}
-              description={'جميع ما يخص عالم الالعاب بين يديك'}
-            />
-            <Category_news
-              loading="lazy"
-              title={' الخليج العربي '}
-              category_news={props.all_news[10]}
-              subs={true}
-              bg_color={'bg-YELLOW'}
-              title_color={'text-YELLOW'}
-              fill_color={'fill-YELLOW'}
-              description={'جميع ما يخص أحداث الخليج العربي'}
-            /> */}
-            <Footer loading="lazy" />
-          </>
-        )}
-      </div>
-    </React.Fragment>
-  )
-}
-export default index
-/*
-          <Colored
-            loading="lazy"
-            title={'يدور حولك'}
-            important_news={props.all_news[2]}
-            card_color={'bg-Purp100'}
-            theme={'bg-Purp200'}
-            text_color={'text-white'}
-            fill_color={'fill-Purp200'}
-            desc_color={'text-GRAY'}
-            description={'الأخبار المقترحه لك بناء على المنطقه المحيطه بك    '}
-          />
-        <section className="mt-6 bg-Purp400 pb-8">
-          <Colored
-            loading="lazy"
-            title={'مخصص لك'}
-            important_news={props.all_news[2]}
-            card_color={'bg-Purp100'}
-            theme={'bg-Purp200'}
-            text_color={'text-white'}
-            fill_color={'fill-Purp200'}
-            desc_color={'text-GRAY'}
-            description={
-              'الأخبار المقترحه لك بناء على المواضيع او الفئات الاخبارية التي تم قرائتها'
-            }
-          />
-        </section>
 // // Dark & Light Mode
 // if (typeof window !== 'undefined') {
 //   darkThemeMq = window.matchMedia('(prefers-color-scheme: dark)')
@@ -313,4 +95,135 @@ export default index
 //     }
 //   })
 // }
+
+const index = (props) => {
+  return (
+    <React.Fragment>
+      {/* {console.log(props.country, props.country_code)} */}
+      <HeadComp />
+      <p>aljscll</p>
+      {/* <div dir="rtl"> */}
+      {/* <div dir="rtl" id="project_body" className="text-black bg-white"> */}
+      {/* <div dir="rtl" id="project_body">
+        <Nav />
+        <section className="pb-10">
+          <ImportantNews
+            title={'أهم الأخبار'}
+            important_news={props.all_news[0]}
+            color={'red-600'}
+            theme={'bg-red-500'}
+          />
+          <Hashtag
+            title={'# هاشتاج الاسبوع'}
+            important_news={props.all_news[1]}
+            other_news={props.all_news[4]}
+            color={'purple-500'}
+            theme={'bg-purple-500'}
+          />
+          <ColoredSection
+            important_news={props.all_news[5]}
+            subscripe={null}
+            theme={'bg-blue-700'}
+            color={'blue-700'}
+            temp={'61°F  🌥'}
+            title={' يدور حولك'}
+            description={'قصص رائعة من حولك'}
+          />
+        </section>
+        <section>
+          <ForYou
+            for_you={props.all_news[2]}
+            color={'green-600'}
+            title={'مخصص لك'}
+            subscripe={null}
+            description={'توصيات بناءً على الموضوعات والقنوات التي تقرأها'}
+          />
+
+          <Voice
+            important_news={props.all_news[4]}
+            theme={'bg-gray-600'}
+            color={'gray-600'}
+            title={'مال و أعمال'}
+            description={
+              'جميع ما يخص عالم المال والأعمال على المستوى المحلي والدولي'
+            }
+          />
+          <ColoredSection
+            important_news={props.all_news[1]}
+            theme={'bg-yellow-400'}
+            color={'yellow-400'}
+            subscripe={false}
+            title={'مال و أعمال'}
+            temp={''}
+            description={
+              'جميع ما يخص عالم المال والأعمال على المستوى المحلي والدولي'
+            }
+          />
+          <ForYou
+            for_you={props.all_news[4]}
+            subscripe={false}
+            color={'pink-700'}
+            title={'تكنولوجيا'}
+            description={'جميع ما يخص عالم التكنولوجيا بين يديك'}
+          />
+          <Logaimat
+            important_news={props.all_news[0]}
+            theme={''}
+            color={''}
+            title={'مال و أعمال'}
+            description={
+              'جميع ما يخص عالم المال والأعمال على المستوى المحلي والدولي'
+            }
+          />
+        </section>
+        <div className="py-4"></div>
+        <section className="to-gray-800 from-gray-600 bg-gradient-to-b pt-1 pb-10">
+          <Video
+            important_news={props.all_news[1]}
+            title={'الفيديوهات'}
+            color={'yellow-400'}
+            theme={'bg-yellow-400'}
+            description={'أكثر ما تم مشاهدته في اللحظات السابقة'}
+          />
+        </section>
+
+        <ForYou
+          for_you={props.all_news[5]}
+          color={'red-400'}
+          title={'الاكثر بحثا'}
+          subscripe={null}
+          description={'توصيات بناءً على الموضوعات التي يتم البحث عنها'}
+        />
+        <ColoredSection
+          important_news={props.all_news[3]}
+          theme={'bg-green-500'}
+          color={'green-500'}
+          subscripe={true}
+          temp={''}
+          title={' أخبار الرياضه'}
+          description={'جميع ما يخص عالم الرياضه'}
+        />
+        <ForYou
+          subscripe={true}
+          for_you={props.all_news[2]}
+          color={'purple-600'}
+          title={'الصحه'}
+          description={'جميع ما هو جديد في ابحاث الصحه بين يديك'}
+        />
+        <Footer />
+      </div> */}
+    </React.Fragment>
+  )
+}
+export default index
+
+/*
+
+      {typeof window !== 'undefined' &&
+      window.matchMedia('(prefers-color-scheme: light)') ? (
+        <h1>LIGHT</h1>
+      ) : (
+        <h1>Dark</h1>
+      )}
+      temp={'61°F 🌥'}
 */

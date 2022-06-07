@@ -35,7 +35,7 @@ module.exports = {
         headers: [
           {
             key: 'Cache-Control',
-            value: 'public, max-age=9999, must-revalidate',
+            value: 'public, max-age=9999999999, must-revalidate',
           },
         ],
       },
@@ -43,7 +43,7 @@ module.exports = {
   },
 
   images: {
-    minimumCacheTTL: 9999,
+    minimumCacheTTL: 99999999,
     domains: [
       'netaq.s3.ap-south-1.amazonaws.com',
       'admin-panel-alzubda.s3.us-east-2.amazonaws.com',
@@ -56,7 +56,6 @@ module.exports = {
       'cdn.discordapp.com',
       'inappimagesalzubda.s3.us-east-2.amazonaws.com',
       'assets.devops.arabiaweather.com',
-      'akm-img-a-in.tosshub.com',
       'images.unsplash.com',
       'media.istockphoto.com',
       'storage.googleapis.com',
@@ -64,7 +63,6 @@ module.exports = {
       'assets.devops.arabiaweather.com',
       'i2-prod.dailyrecord.co.uk',
       'media.gettyimages.com',
-      'aljaras.com',
       'cdn-icons-png.flaticon.com',
       'alzubda.com',
       'res.cloudinary.com',
